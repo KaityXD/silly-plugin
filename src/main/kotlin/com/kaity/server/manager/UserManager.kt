@@ -83,6 +83,7 @@ class UserManager(val plugin: SillyPlugin) : Listener {
                 showJoinQuitMessages = data.showJoinQuit
                 flightMode = data.flightMode
                 commandFeedback = data.commandFeedback
+                timezone = data.timezone
                 kills = data.kills
                 deaths = data.deaths
                 playtime = data.playtime
@@ -99,7 +100,7 @@ class UserManager(val plugin: SillyPlugin) : Listener {
     }
 
     fun saveUser(user: ServerUser) {
-        database.insertOrUpdateUser(user.id, user.name, user.autoAcceptTPA, user.showJoinQuitMessages, user.flightMode, user.commandFeedback, user.kills, user.deaths, user.playtime, user.firstJoin)
+        database.insertOrUpdateUser(user.id, user.name, user.autoAcceptTPA, user.showJoinQuitMessages, user.flightMode, user.commandFeedback, user.kills, user.deaths, user.playtime, user.firstJoin, user.timezone)
     }
 
     fun saveAll() {

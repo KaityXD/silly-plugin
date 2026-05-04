@@ -30,6 +30,27 @@ object GeneralCommands : CommandModule {
           target.msg("<green>Fed ${target.name}.")
         }.suggest { com.kaity.server.util.Suggest.players(it) }
 
+        command("timezone", "Set your timezone") {
+            val p = player ?: return@command
+            val user = userManager.getUser(p) ?: return@command
+            
+            if (args.isEmpty()) {
+                p.msg("<yellow>Your current timezone is: <white>${user.timezone}</white>")
+                p.msg("<gray>Use <white>/timezone <ZoneID></white> to change it. (Example: <white>America/New_York</white>)")
+                return@command
+            }
+
+            val zoneId = args[0]
+            try {
+                java.time.ZoneId.of(zoneId)
+                user.timezone = zoneId
+                p.msg("<green>Your timezone has been set to: <white>$zoneId</white>")
+                userManager.saveUser(user)
+            } catch (e: Exception) {
+                p.msg("<red>Invalid timezone ID! <gray>Search online for 'Java ZoneId list' to find yours.")
+            }
+        }.suggest { java.time.ZoneId.getAvailableZoneIds().toList() }
+
         if (config.getBoolean("enderchest.enabled", true)) {
             val ecPerm = config.getString("enderchest.permission", "sillyplugin.enderchest")
             command("enderchest", "Open your enderchest", aliases = listOf("ec"), permission = ecPerm) {

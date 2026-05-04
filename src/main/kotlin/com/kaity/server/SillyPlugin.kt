@@ -29,6 +29,7 @@ class SillyPlugin : JavaPlugin() {
     lateinit var afkManager: AFKManager
     lateinit var moderationManager: ModerationManager
     lateinit var displayManager: DisplayManager
+    lateinit var scoreboardLibrary: net.megavex.scoreboardlibrary.api.ScoreboardLibrary
 
     // --- GUI Menus ---
     lateinit var homeGUI: HomeGUI
@@ -53,6 +54,8 @@ class SillyPlugin : JavaPlugin() {
     override fun onEnable() {
         saveDefaultConfig()
         
+        scoreboardLibrary = net.megavex.scoreboardlibrary.api.ScoreboardLibrary.loadScoreboardLibrary(this)
+
         // Initializing managers in specific order to avoid dependency issues
         userManager       = UserManager(this)
         permissionManager = PermissionManager(this)
@@ -63,6 +66,7 @@ class SillyPlugin : JavaPlugin() {
         chatManager       = ChatManager(this)
         afkManager        = AFKManager(this)
         moderationManager = ModerationManager(this)
+        displayManager    = DisplayManager(this)
 
         // Core events & Input handlers
         server.pluginManager.registerEvents(GuiListener(), this)
@@ -101,6 +105,10 @@ class SillyPlugin : JavaPlugin() {
         if (::userManager.isInitialized) {
             userManager.saveAll()
             userManager.database.close()
+        }
+        
+        if (::scoreboardLibrary.isInitialized) {
+            scoreboardLibrary.close()
         }
     }
 

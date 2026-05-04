@@ -9,6 +9,7 @@ class ServerUser(val id: UUID, var name: String) {
     var showJoinQuitMessages: Boolean = true
     var flightMode: Boolean = false
     var commandFeedback: Boolean = true
+    var timezone: String = "UTC"
     
     // Stats
     var kills: Int = 0

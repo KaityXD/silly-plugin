@@ -57,7 +57,8 @@ class DatabaseManager(private val plugin: SillyPlugin) {
                     kills INTEGER NOT NULL DEFAULT 0,
                     deaths INTEGER NOT NULL DEFAULT 0,
                     playtime INTEGER NOT NULL DEFAULT 0,
-                    first_join TEXT NOT NULL DEFAULT ''
+                    first_join TEXT NOT NULL DEFAULT '',
+                    timezone TEXT NOT NULL DEFAULT 'UTC'
                 )
             """.trimIndent())
 
@@ -163,7 +164,8 @@ class DatabaseManager(private val plugin: SillyPlugin) {
                 "kills"            to "INTEGER NOT NULL DEFAULT 0",
                 "deaths"           to "INTEGER NOT NULL DEFAULT 0",
                 "playtime"         to "INTEGER NOT NULL DEFAULT 0",
-                "first_join"       to "TEXT NOT NULL DEFAULT ''"
+                "first_join"       to "TEXT NOT NULL DEFAULT ''",
+                "timezone"         to "TEXT NOT NULL DEFAULT 'UTC'"
             ))
 
             migrateTable(stmt, "homes", mapOf(
@@ -225,11 +227,11 @@ class DatabaseManager(private val plugin: SillyPlugin) {
         uuid: UUID, name: String,
         autoAcceptTPA: Boolean, showJoinQuit: Boolean,
         flightMode: Boolean, commandFeedback: Boolean,
-        kills: Int, deaths: Int, playtime: Long, firstJoin: String
+        kills: Int, deaths: Int, playtime: Long, firstJoin: String, timezone: String
     ) = safe("save user $name") {
         connection.prepareStatement("""
-            INSERT INTO users (uuid, name, auto_accept_tpa, show_join_quit, flight_mode, command_feedback, kills, deaths, playtime, first_join)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (uuid, name, auto_accept_tpa, show_join_quit, flight_mode, command_feedback, kills, deaths, playtime, first_join, timezone)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(uuid) DO UPDATE SET
                 name             = excluded.name,
                 auto_accept_tpa  = excluded.auto_accept_tpa,
@@ -239,7 +241,8 @@ class DatabaseManager(private val plugin: SillyPlugin) {
                 kills            = excluded.kills,
                 deaths           = excluded.deaths,
                 playtime         = excluded.playtime,
-                first_join       = CASE WHEN users.first_join = '' OR users.first_join IS NULL THEN excluded.first_join ELSE users.first_join END
+                first_join       = CASE WHEN users.first_join = '' OR users.first_join IS NULL THEN excluded.first_join ELSE users.first_join END,
+                timezone         = excluded.timezone
         """.trimIndent()).use { ps ->
             ps.setString(1, uuid.toString())
             ps.setString(2, name)
@@ -251,13 +254,14 @@ class DatabaseManager(private val plugin: SillyPlugin) {
             ps.setInt(8, deaths)
             ps.setLong(9, playtime)
             ps.setString(10, firstJoin)
+            ps.setString(11, timezone)
             ps.executeUpdate()
         }
     }
 
     fun getUser(uuid: UUID): UserData? = safe("load user $uuid") {
         connection.prepareStatement(
-            "SELECT name, auto_accept_tpa, show_join_quit, flight_mode, command_feedback, kills, deaths, playtime, first_join FROM users WHERE uuid = ?"
+            "SELECT name, auto_accept_tpa, show_join_quit, flight_mode, command_feedback, kills, deaths, playtime, first_join, timezone FROM users WHERE uuid = ?"
         ).use { ps ->
             ps.setString(1, uuid.toString())
             ps.executeQuery().use { rs ->
@@ -272,6 +276,7 @@ class DatabaseManager(private val plugin: SillyPlugin) {
                     deaths          = rs.getInt("deaths"),
                     playtime        = rs.getLong("playtime"),
                     firstJoin       = rs.getString("first_join"),
+                    timezone        = rs.getString("timezone"),
                     homes           = getHomesInternal(uuid)
                 ) else null
             }
@@ -626,6 +631,7 @@ data class UserData(
     val deaths: Int,
     val playtime: Long,
     val firstJoin: String,
+    val timezone: String,
     val homes: Map<String, Home>
 )
 

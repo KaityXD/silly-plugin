@@ -15,7 +15,6 @@ object Messenger {
     
     // Parses a string with the prefix and sends it
     fun send(sender: CommandSender, text: String) {
-        // Automatically handle strings that already have the prefix or shouldn't have it (optional logic if needed)
         sender.sendMessage(parse("$PREFIX<reset>$text"))
     }
     

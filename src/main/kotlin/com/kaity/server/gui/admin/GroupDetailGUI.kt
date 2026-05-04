@@ -42,7 +42,7 @@ class GroupDetailGUI(val plugin: SillyPlugin) {
             }
 
             // Edit Weight
-            setItem(54, item(Material.COMPARATOR) {
+            setItem(53, item(Material.COMPARATOR) {
                 name("<yellow><bold>Edit Weight")
                 lore(" <gray>Current Weight: <white>${groupData.weight}", "", " <gray>» Click to edit")
             }) {

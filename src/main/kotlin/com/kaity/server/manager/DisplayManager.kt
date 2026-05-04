@@ -3,16 +3,22 @@ package com.kaity.server.manager
 import com.kaity.server.SillyPlugin
 import com.kaity.server.util.Messenger
 import net.kyori.adventure.text.Component
+import net.megavex.scoreboardlibrary.api.sidebar.Sidebar
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.scoreboard.Criteria
-import org.bukkit.scoreboard.DisplaySlot
+import org.bukkit.event.player.PlayerQuitEvent
+import java.util.*
 import java.util.concurrent.TimeUnit
 
+/**
+ * Handles Tablist and Scoreboard (via Megavex ScoreboardLibrary for Folia compatibility).
+ */
 class DisplayManager(val plugin: SillyPlugin) : Listener {
+
+    private val sidebars = mutableMapOf<UUID, Sidebar>()
 
     private val scoreboardEnabled = plugin.config.getBoolean("scoreboard.enabled", true)
     private val scoreboardInterval = plugin.config.getLong("scoreboard.update_interval", 20L)
@@ -23,15 +29,15 @@ class DisplayManager(val plugin: SillyPlugin) : Listener {
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)
 
+        // Async update tasks for Folia
         if (scoreboardEnabled) {
             val periodMs = scoreboardInterval * 50
             Bukkit.getAsyncScheduler().runAtFixedRate(plugin, { _ ->
-                Bukkit.getOnlinePlayers().forEach { player ->
-                    player.scheduler.run(plugin, { _ ->
-                        if (player.isOnline) {
-                            updateScoreboard(player)
-                        }
-                    }, null)
+                sidebars.forEach { (uuid, sidebar) ->
+                    val player = Bukkit.getPlayer(uuid)
+                    if (player != null && player.isOnline) {
+                        updateBoard(player, sidebar)
+                    }
                 }
             }, periodMs, periodMs, TimeUnit.MILLISECONDS)
         }
@@ -40,11 +46,7 @@ class DisplayManager(val plugin: SillyPlugin) : Listener {
             val periodMs = tablistInterval * 50
             Bukkit.getAsyncScheduler().runAtFixedRate(plugin, { _ ->
                 Bukkit.getOnlinePlayers().forEach { player ->
-                    player.scheduler.run(plugin, { _ ->
-                        if (player.isOnline) {
-                            updateTablist(player)
-                        }
-                    }, null)
+                    updateTablist(player)
                 }
             }, periodMs, periodMs, TimeUnit.MILLISECONDS)
         }
@@ -54,19 +56,33 @@ class DisplayManager(val plugin: SillyPlugin) : Listener {
     fun onJoin(event: PlayerJoinEvent) {
         val player = event.player
         if (scoreboardEnabled) {
-            setupScoreboard(player)
-            updateScoreboard(player)
+            val sidebar = plugin.scoreboardLibrary.createSidebar()
+            sidebar.addPlayer(player)
+            sidebars[player.uniqueId] = sidebar
+            updateBoard(player, sidebar)
         }
         if (tablistEnabled) {
             updateTablist(player)
         }
     }
 
+    @EventHandler
+    fun onQuit(event: PlayerQuitEvent) {
+        // Essential cleanup to prevent memory leaks
+        sidebars.remove(event.player.uniqueId)?.close()
+    }
+
     private fun replacePlaceholders(player: Player, text: String): String {
-        return text
+        var parsed = text
             .replace("%player_name%", player.name)
             .replace("%player_ping%", player.ping.toString())
             .replace("%server_online%", Bukkit.getOnlinePlayers().size.toString())
+            
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            parsed = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, parsed)
+        }
+        
+        return parsed
     }
 
     private fun updateTablist(player: Player) {
@@ -79,55 +95,22 @@ class DisplayManager(val plugin: SillyPlugin) : Listener {
         player.sendPlayerListHeaderAndFooter(header, footer)
     }
 
-    private fun setupScoreboard(player: Player) {
-        val manager = Bukkit.getScoreboardManager()
-        val scoreboard = manager.newScoreboard
+    /**
+     * Updates the Scoreboard for a player.
+     * Uses Adventure Components for full color/gradient support.
+     */
+    private fun updateBoard(player: Player, sidebar: Sidebar) {
         val titleStr = plugin.config.getString("scoreboard.title", "<gold><bold>Silly Server</bold></gold>")!!
-        
-        val objective = scoreboard.registerNewObjective("silly_board", Criteria.DUMMY, Messenger.parse(titleStr))
-        objective.displaySlot = DisplaySlot.SIDEBAR
-        
-        player.scoreboard = scoreboard
-    }
-
-    private fun updateScoreboard(player: Player) {
-        val scoreboard = player.scoreboard
-        val objective = scoreboard.getObjective("silly_board") ?: return
-        
-        val titleStr = plugin.config.getString("scoreboard.title", "<gold><bold>Silly Server</bold></gold>")!!
-        objective.displayName(Messenger.parse(replacePlaceholders(player, titleStr)))
+        sidebar.title(Messenger.parse(replacePlaceholders(player, titleStr)))
 
         val lines = plugin.config.getStringList("scoreboard.lines")
+        val formattedLines = lines.take(15).map { Messenger.parse(replacePlaceholders(player, it)) }
         
-        for (i in lines.indices) {
-            val scoreValue = lines.size - i
-            val teamName = "line_\$i"
-            var team = scoreboard.getTeam(teamName)
-            
-            // Unique entry using a combination of invisible color codes based on index
-            val entryColor = "§" + Integer.toHexString(i) + "§r"
-
-            if (team == null) {
-                team = scoreboard.registerNewTeam(teamName)
-                team.addEntry(entryColor)
-                objective.getScore(entryColor).score = scoreValue
+        for (i in 0 until 15) {
+            if (i < formattedLines.size) {
+                sidebar.line(i, formattedLines[i])
             } else {
-                objective.getScore(entryColor).score = scoreValue
-            }
-            
-            val lineStr = replacePlaceholders(player, lines[i])
-            team.prefix(Messenger.parse(lineStr))
-            team.suffix(Component.empty())
-        }
-        
-        // Clean up excess teams/scores
-        for (i in lines.size..15) {
-            val teamName = "line_\$i"
-            val team = scoreboard.getTeam(teamName)
-            if (team != null) {
-                val entryColor = "§" + Integer.toHexString(i) + "§r"
-                scoreboard.resetScores(entryColor)
-                team.unregister()
+                sidebar.line(i, null)
             }
         }
     }
