@@ -1,0 +1,23 @@
+# Gradle
+.gradle/
+build/
+
+# Kotlin
+.kotlin/
+
+# IDEs
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+
+# Plugin Specific
+test.db
+test.jar
+test.kt
+GEMINI.md
+*.log
+
+# Build scripts that might be local
+build.sh

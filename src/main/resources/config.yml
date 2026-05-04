@@ -1,0 +1,24 @@
+enderchest:
+  enabled: true
+  permission: "sillyplugin.enderchest"
+
+scoreboard:
+  enabled: true
+  update_interval: 20 # in ticks, 20 ticks = 1 second
+  title: "<gold><bold>Silly Server</bold></gold>"
+  lines:
+    - ""
+    - "<yellow>Player:</yellow> <white>%player_name%</white>"
+    - "<yellow>Ping:</yellow> <white>%player_ping%</white>"
+    - ""
+    - "<gray>play.sillyserver.com</gray>"
+
+tablist:
+  enabled: true
+  update_interval: 20 # in ticks
+  header: |
+    <gold><bold>Silly Server</bold></gold>
+    <gray>Welcome back, <white>%player_name%</white>!</gray>
+  footer: |
+    <yellow>Players Online:</yellow> <white>%server_online%</white>
+    <gray>play.sillyserver.com</gray>

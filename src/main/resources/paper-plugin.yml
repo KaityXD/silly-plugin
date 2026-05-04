@@ -1,0 +1,10 @@
+name: KatsSillyPlugin
+version: '1.0.2'
+main: com.kaity.server.SillyPlugin
+api-version: '1.21'
+folia-supported: true
+authors: [Kaity]
+description: Kat's silly plugin
+mappings-namespace: spigot
+
+
