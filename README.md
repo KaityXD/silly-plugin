@@ -24,6 +24,7 @@ Our goal is to create an all-in-one server solution that doesn't feel bloated, b
 - **Display Entity Manipulation Library:** We are currently working on a built-in library to make spawning and animating Display Entities (Text, Item, Block) dead simple for other developers and internal modules.
 - **Custom Event System:** More hooks for third-party integration.
 - **Web-Hook Support:** Optional Discord logging for administrative actions.
+- Support More databases
 
 ---
 
