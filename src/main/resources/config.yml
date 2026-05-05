@@ -2,16 +2,26 @@ enderchest:
   enabled: true
   permission: "sillyplugin.enderchest"
 
+messages:
+  join: "<gray>[<green>+</green>] <white>%prefix%%player_name%%suffix%</white> joined the server."
+  quit: "<gray>[<red>-</red>] <white>%prefix%%player_name%%suffix%</white> left the server."
+  first_join: "<gray>[<gradient:#9863E7:#E43A96>Welcome</gradient>] <white>%player_name%</white> joined for the first time!"
+
+custom_placeholders:
+  "%discord%": "<blue>discord.gg/silly</blue>"
+  "%store%": "<gold>store.sillyserver.com</gold>"
+  "%website%": "<gradient:#9863E7:#E43A96>sillyserver.com</gradient>"
+
 scoreboard:
   enabled: true
   update_interval: 20 # in ticks, 20 ticks = 1 second
-  title: "<gold><bold>Silly Server</bold></gold>"
+  title: "<red>Silly <white><bold>Server"
   lines:
     - ""
-    - "<yellow>Player:</yellow> <white>%player_name%</white>"
-    - "<yellow>Ping:</yellow> <white>%player_ping%</white>"
+    - "<gray>Player:</gray> %player_name%"
+    - "<gray>Ping:</gray> <green>%status_ping%</green> <gray>(%player_ping%ms)</gray>"
     - ""
-    - "<gray>play.sillyserver.com</gray>"
+    - "<gray>aikoxd.fun</gray>"
 
 tablist:
   enabled: true
@@ -21,4 +31,25 @@ tablist:
     <gray>Welcome back, <white>%player_name%</white>!</gray>
   footer: |
     <yellow>Players Online:</yellow> <white>%server_online%</white>
-    <gray>play.sillyserver.com</gray>
+    <white>TPS:</white> <green>%server_tps%</green>
+    <gray>aikoxd.fun</gray>
+  player_name_format: "%if_afk%%prefix%%player_name%%suffix%"
+
+animations:
+  logo:
+    change_interval: 50 # ms
+    texts:
+      - "<gradient:#BE4FBF:#E43A96>Silly</gradient>"
+      - "<gradient:#AB59D3:#E43A96>Silly</gradient>"
+      - "<gradient:#9863E7:#D144AA>Silly</gradient>"
+      - "<gradient:#E43A96:#BE4FBF>Silly</gradient>"
+      - "<gradient:#D144AA:#AB59D3>Silly</gradient>"
+      - "<gradient:#BE4FBF:#E43A96>Silly</gradient>"
+      - "<gradient:#AB59D3:#E43A96>Silly</gradient>"
+      - "<gradient:#9863E7:#D144AA>Silly</gradient>"
+  news:
+    change_interval: 3000 # 3 seconds
+    texts:
+      - "Visit our website at <gradient:#9863E7:#E43A96>sillyserver.com</gradient>"
+      - "Join our Discord: <blue>discord.gg/silly</blue>"
+      - "Check out the <yellow>/shop</yellow> for cool perks!"

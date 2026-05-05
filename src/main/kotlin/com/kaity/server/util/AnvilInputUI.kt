@@ -37,7 +37,7 @@ object AnvilInputUI : Listener {
         
         val item = ItemStack(Material.PAPER).apply {
             editMeta { meta ->
-                meta.displayName(Messenger.parse(defaultText))
+                meta.displayName(net.kyori.adventure.text.Component.text(defaultText))
             }
         }
         
@@ -93,18 +93,13 @@ object AnvilInputUI : Listener {
             val plugin = JavaPlugin.getProvidingPlugin(AnvilInputUI::class.java)
             player.scheduler.runDelayed(plugin, { _ ->
                 val inventory = player.inventory
-                
-                // Directly loop through the player's inventory and delete the specific paper
                 for (i in 0 until inventory.size) {
                     val item = inventory.getItem(i) ?: continue
-                    
                     if (item.type == Material.PAPER && item.hasItemMeta()) {
                         val meta = item.itemMeta
                         if (meta != null && meta.hasDisplayName()) {
-                            val name = PlainTextComponentSerializer.plainText().serialize(meta.displayName()!!)
-                            if (name == "Enter Name...") {
-                                inventory.setItem(i, null)
-                            }
+                            // Clear any paper that looks like our input item to prevent accidental "giving" of the paper
+                            inventory.setItem(i, null)
                         }
                     }
                 }

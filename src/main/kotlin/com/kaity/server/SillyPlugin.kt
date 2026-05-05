@@ -29,6 +29,7 @@ class SillyPlugin : JavaPlugin() {
     lateinit var afkManager: AFKManager
     lateinit var moderationManager: ModerationManager
     lateinit var displayManager: DisplayManager
+    lateinit var animationManager: AnimationManager
     lateinit var scoreboardLibrary: net.megavex.scoreboardlibrary.api.ScoreboardLibrary
 
     // --- GUI Menus ---
@@ -37,6 +38,8 @@ class SillyPlugin : JavaPlugin() {
     lateinit var tpaGUI: TPAGUI
     lateinit var mainGUI: MainGUI
     lateinit var profileGUI: ProfileGUI
+    lateinit var itemViewerGUI: ItemViewerGUI
+    lateinit var snapshotViewerGUI: SnapshotViewerGUI
     lateinit var kitHubGUI: KitHubGUI
     lateinit var kitGUI: KitLoaderGUI
     lateinit var kitPreviewGUI: KitPreviewGUI
@@ -66,6 +69,7 @@ class SillyPlugin : JavaPlugin() {
         chatManager       = ChatManager(this)
         afkManager        = AFKManager(this)
         moderationManager = ModerationManager(this)
+        animationManager  = AnimationManager(this)
         displayManager    = DisplayManager(this)
 
         // Core events & Input handlers
@@ -82,6 +86,8 @@ class SillyPlugin : JavaPlugin() {
         tpaGUI            = TPAGUI(this)
         mainGUI           = MainGUI(this)
         profileGUI        = ProfileGUI(this)
+        itemViewerGUI     = ItemViewerGUI(this)
+        snapshotViewerGUI = SnapshotViewerGUI(this)
         kitHubGUI         = KitHubGUI(this)
         kitGUI            = KitLoaderGUI(this)
         kitPreviewGUI     = KitPreviewGUI(this)

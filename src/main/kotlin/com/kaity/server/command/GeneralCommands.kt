@@ -59,5 +59,20 @@ object GeneralCommands : CommandModule {
             }
         }
         
+        command("silly", "Main command for SillyPlugin", aliases = listOf("sillyreload", "sillyplugin"), permission = "sillyplugin.admin") {
+            if (args.isEmpty() && !label.equals("sillyreload", true)) {
+                player?.msg("<red>Usage: /silly reload") ?: sender.sendMessage("Usage: /silly reload")
+                return@command
+            }
+            
+            val action = if (args.isNotEmpty()) args[0].lowercase() else ""
+            if (action == "reload" || label.equals("sillyreload", true)) {
+                reloadConfig()
+                player?.msg("<green>SillyPlugin configuration reloaded!")
+                    ?: sender.sendMessage("SillyPlugin configuration reloaded!")
+            } else {
+                player?.msg("<red>Unknown argument. Usage: /silly reload")
+            }
+        }
     }
 }

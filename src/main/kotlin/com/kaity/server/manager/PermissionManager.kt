@@ -39,6 +39,32 @@ class PermissionManager(private val plugin: SillyPlugin) : Listener {
         setupPermissions(player)
     }
 
+    fun getPrefix(uuid: UUID): String {
+        return getHighestGroup(uuid)?.prefix ?: ""
+    }
+
+    fun getSuffix(uuid: UUID): String {
+        return getHighestGroup(uuid)?.suffix ?: ""
+    }
+
+    private fun getHighestGroup(uuid: UUID): GroupData? {
+        val targetUuid = testAsMap[uuid] ?: uuid
+        val directGroups = plugin.userManager.database.getUserGroups(targetUuid)
+        
+        // Find all groups including inheritance
+        val allGroups = mutableSetOf<String>()
+        val queue = ArrayDeque<String>(directGroups)
+        while (queue.isNotEmpty()) {
+            val group = queue.removeFirst()
+            if (allGroups.add(group)) {
+                queue.addAll(plugin.userManager.database.getGroupInheritance(group))
+            }
+        }
+
+        return allGroups.mapNotNull { plugin.userManager.database.getGroup(it) }
+            .maxByOrNull { it.weight }
+    }
+
     private fun setupPermissions(player: Player) {
         val attachment = player.addAttachment(plugin)
         attachments[player.uniqueId] = attachment
